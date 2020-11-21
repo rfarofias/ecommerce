@@ -9,8 +9,8 @@ use \Hcode\Mailer;
 class User extends Model {
 
     const SESSION = "User";
-    const ERROR_USER = "User_Error";
-
+    const ERROR_LOGIN = "UserError";
+    const ERROR_REGISTER = "ErrorRegister";
     const SECRET = "HcodePhp7_Secret";
     const SECRET_IV = "HcodePhp7_Secret";
 
@@ -38,6 +38,18 @@ class User extends Model {
                     return false;
                 }
             }   
+    }
+
+    public static function checkLoginExist($login) {
+        $sql = new Sql();
+
+        $results = $sql->select("SELECT deslogin FROM tb_users
+                                WHERE deslogin = :deslogin", array (
+            ":deslogin"=>$login
+        ));
+        //var_dump($login, $results); exit;
+        return (count($results) > 0);
+
     }
 
     public static function login($login, $password) {
@@ -224,18 +236,31 @@ class User extends Model {
     }
 
     public static function setMsgError($msg){
-        $_SESSION[User::ERROR_USER] = $msg;
+        $_SESSION[User::ERROR_LOGIN] = $msg;
     }
 
     public static function getMsgError(){
-
-        $msg = (isset($_SESSION[User::ERROR_USER])) ? $_SESSION[User::ERROR_USER] : '';
+        $msg = (isset($_SESSION[User::ERROR_LOGIN])) ? $_SESSION[User::ERROR_LOGIN] : '';
         User::clearMsgError();
         return $msg;
     }
 
     public static function clearMsgError(){
-        $_SESSION[User::ERROR_USER] = NULL;
+        $_SESSION[User::ERROR_LOGIN] = NULL;
+    }
+
+    public static function setMsgErrorRegister($msg){
+        $_SESSION[User::ERROR_REGISTER] = $msg;
+    }
+
+    public static function getMsgErrorRegister(){
+        $msg = (isset($_SESSION[User::ERROR_REGISTER])) ? $_SESSION[User::ERROR_REGISTER] : '';
+        User::clearMsgErrorRegister();
+        return $msg;
+    }
+
+    public static function clearMsgErrorRegister(){
+        $_SESSION[User::ERROR_REGISTER] = NULL;
     }
 
     public static function getPasswordHash($password) {
