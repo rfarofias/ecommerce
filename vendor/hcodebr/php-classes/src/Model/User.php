@@ -9,6 +9,7 @@ use \Hcode\Mailer;
 class User extends Model {
 
     const SESSION = "User";
+    const ERROR_USER = "User_Error";
 
     const SECRET = "HcodePhp7_Secret";
     const SECRET_IV = "HcodePhp7_Secret";
@@ -42,7 +43,9 @@ class User extends Model {
     public static function login($login, $password) {
         $sql = new Sql();
 
-        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array (
+        $results = $sql->select("SELECT * FROM tb_users a 
+                                 INNER JOIN tb_persons b ON a.idperson = b.idperson
+                                WHERE deslogin = :LOGIN", array (
             ":LOGIN"=>$login
         ));
 
@@ -53,9 +56,9 @@ class User extends Model {
     
         if(password_verify($password, $data["despassword"])) {
             $user = new User();
+            $data['desperson'] = utf8_encode($data['desperson']);
 
             $user->setData($data);
-
             $_SESSION[User::SESSION] = $user->getValues();
 
             return $user;
@@ -67,15 +70,18 @@ class User extends Model {
  
     public static function verifyLogin($inadmin = true) {
 
-        if (User::checkLogin($inadmin)) {
-            header("Location: /admin/login");
+        if (!User::checkLogin($inadmin)) {
+            if ($inadmin) {
+                header("Location: /admin/login");
+            } else {
+                header("Location: /login");
+            }
             exit;
         }
     }
 
     public static function logout(){
         $_SESSION[User::SESSION] = NULL;
-        //session_unset($_SESSION[User::SESSION]);
     }
 
     public static function listAll(){
@@ -89,12 +95,12 @@ class User extends Model {
         $sql = new Sql();
 
         $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
-            ":desperson"=>$this->getdesperson(),
-            ":deslogin"=>$this->getdeslogin(),
-            ":despassword"=>$this->getdespassword(),
-            ":desemail"=>$this->getdesemail(),
-            ":nrphone"=>$this->getnrphone(),
-            ":inadmin"=>$this->getinadmin()
+            ":desperson"    =>utf8_decode($this->getdesperson()),
+            ":deslogin"     =>$this->getdeslogin(),
+            ":despassword"  =>User::getPasswordHash($this->getdespassword()),
+            ":desemail"     =>$this->getdesemail(),
+            ":nrphone"      =>$this->getnrphone(),
+            ":inadmin"      =>$this->getinadmin()
         ));
 
         $this->setData($results[0]);
@@ -107,6 +113,7 @@ class User extends Model {
             ":iduser"=>$iduser
         ));
 
+        $data['desperson'] = utf8_encode($data['desperson']);
         $this->setData($results[0]);
     }
 
@@ -114,13 +121,13 @@ class User extends Model {
         $sql = new Sql();
 
         $results = $sql->select("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
-            ":iduser"=>$this->getiduser(),
-            ":desperson"=>$this->getdesperson(),
-            ":deslogin"=>$this->getdeslogin(),
-            ":despassword"=>$this->getdespassword(),
-            ":desemail"=>$this->getdesemail(),
-            ":nrphone"=>$this->getnrphone(),
-            ":inadmin"=>$this->getinadmin()
+            ":iduser"       =>$this->getiduser(),
+            ":desperson"    =>utf8_decode($this->getdesperson()),
+            ":deslogin"     =>$this->getdeslogin(),
+            ":despassword"  =>User::getPasswordHash($this->getdespassword()),
+            ":desemail"     =>$this->getdesemail(),
+            ":nrphone"      =>$this->getnrphone(),
+            ":inadmin"      =>$this->getinadmin()
         ));
 
         $this->setData($results[0]);        
@@ -136,8 +143,7 @@ class User extends Model {
     public static function getForgot($email){
         $sql = new Sql();
 
-        $results = $sql->select("
-            SELECT * 
+        $results = $sql->select("SELECT * 
             FROM tb_persons a
             INNER JOIN tb_users b USING(idperson)
             WHERE a.desemail = :email;
@@ -177,8 +183,7 @@ class User extends Model {
 
         $sql = new Sql();
 
-        $results = $sql->select("
-            SELECT * 
+        $results = $sql->select("SELECT * 
             FROM tb_userspasswordsrecoveries a
             INNER JOIN tb_users b USING(iduser)
             INNER JOIN tb_persons c USING(idperson)
@@ -216,6 +221,27 @@ class User extends Model {
                         ":iduser"=>$this->getiduser()
                     ));
 
+    }
+
+    public static function setMsgError($msg){
+        $_SESSION[User::ERROR_USER] = $msg;
+    }
+
+    public static function getMsgError(){
+
+        $msg = (isset($_SESSION[User::ERROR_USER])) ? $_SESSION[User::ERROR_USER] : '';
+        User::clearMsgError();
+        return $msg;
+    }
+
+    public static function clearMsgError(){
+        $_SESSION[User::ERROR_USER] = NULL;
+    }
+
+    public static function getPasswordHash($password) {
+        return password_hash($password, PASSWORD_DEFAULT, [
+            'cost'=>12
+        ]);
     }
 
 }
