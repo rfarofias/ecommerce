@@ -50,7 +50,6 @@
 		//var_dump($product); exit;
 
 		$page = new Page();
-		// $page->setTpl("product-detail");
 		$page->setTpl("product-detail", [
 			'product'=>$product->getValues(),
 			'categories'=>$product->getCategories()
@@ -60,10 +59,12 @@
 
 	$app->get("/cart", function(){
 		$cart = Cart::getFromSession();
+		
 		$page = new Page();
 		$page->setTpl("cart", [
 			'cart'=>$cart->getValues(),
-			'products'=>$cart->getProducts()
+			'products'=>$cart->getProducts(),
+			'error'=>Cart::getMsgError()
 		]);
 	});
 
@@ -98,6 +99,14 @@
 
 		$cart = Cart::getFromSession();
 		$cart->removeProduct($product, true);
+
+		header("location: /cart");
+		exit;
+	});
+
+	$app->post('/cart/freight', function(){
+		$cart = Cart::getFromSession();
+		$cart->setFreight($_POST['zipcode']);
 
 		header("location: /cart");
 		exit;
