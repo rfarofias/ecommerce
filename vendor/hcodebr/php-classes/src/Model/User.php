@@ -11,6 +11,7 @@ class User extends Model {
     const SESSION = "User";
     const ERROR_LOGIN = "UserError";
     const ERROR_REGISTER = "ErrorRegister";
+    const SUCCESS ="successUser";
     const SECRET = "HcodePhp7_Secret";
     const SECRET_IV = "HcodePhp7_Secret";
 
@@ -125,6 +126,7 @@ class User extends Model {
             ":iduser"=>$iduser
         ));
 
+        $data = $results[0];
         $data['desperson'] = utf8_encode($data['desperson']);
         $this->setData($results[0]);
     }
@@ -152,7 +154,7 @@ class User extends Model {
         ));
     }
 
-    public static function getForgot($email){
+    public static function getForgot($email, $inadmin = true){
         $sql = new Sql();
 
         $results = $sql->select("SELECT * 
@@ -178,7 +180,11 @@ class User extends Model {
                 $dataRecover = $results2[0];
                 $code = base64_encode(openssl_encrypt($dataRecover["idrecovery"], 'AES-256-CBC', User::SECRET, 0, User::SECRET_IV));
 
-                $link="http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+                if ($inadmin === true) {
+                    $link="http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+                } else {
+                    $link="http://www.hcodecommerce.com.br/forgot/reset?code=$code";
+                }
 
                 $mailer = new Mailer($data["desemail"], $data["desperson"], "Redifinir senha da Hcode Store", "forgot", 
                             array("name"=>$data["desperson"], "link"=>$link)
@@ -246,7 +252,21 @@ class User extends Model {
     }
 
     public static function clearMsgError(){
-        $_SESSION[User::ERROR_LOGIN] = NULL;
+        $_SESSION[User::SUCCESS] = NULL;
+    }
+
+    public static function setMsgSuccess($msg){
+        $_SESSION[User::SUCCESS] = $msg;
+    }
+
+    public static function getMsgSuccess(){
+        $msg = (isset($_SESSION[User::SUCCESS])) ? $_SESSION[User::SUCCESS] : '';
+        User::clearMsgSuccess();
+        return $msg;
+    }
+
+    public static function clearMsgSuccess(){
+        $_SESSION[User::SUCCESS] = NULL;
     }
 
     public static function setMsgErrorRegister($msg){
