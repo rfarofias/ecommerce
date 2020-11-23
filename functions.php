@@ -8,6 +8,10 @@
         return number_format($vlprice, 2, ",", ".");
     }
 
+    function formatDate($date) {
+        return date('Y-m-d', strtotime($date));
+    }
+
     function checkLogin($inadmin = true) {
         return User::checkLogin($inadmin);
     }
