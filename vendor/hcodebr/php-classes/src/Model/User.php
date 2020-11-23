@@ -110,7 +110,8 @@ class User extends Model {
         $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
             ":desperson"    =>utf8_decode($this->getdesperson()),
             ":deslogin"     =>$this->getdeslogin(),
-            ":despassword"  =>User::getPasswordHash($this->getdespassword()),
+            //":despassword"  =>User::getPasswordHash($this->getdespassword()),
+            ":despassword"  =>$this->getdespassword(),
             ":desemail"     =>$this->getdesemail(),
             ":nrphone"      =>$this->getnrphone(),
             ":inadmin"      =>$this->getinadmin()
@@ -143,6 +144,8 @@ class User extends Model {
             ":nrphone"      =>$this->getnrphone(),
             ":inadmin"      =>$this->getinadmin()
         ));
+
+        var_dump($results);
 
         $this->setData($results[0]);        
     }
@@ -252,7 +255,7 @@ class User extends Model {
     }
 
     public static function clearMsgError(){
-        $_SESSION[User::SUCCESS] = NULL;
+        $_SESSION[User::ERROR_LOGIN] = NULL;
     }
 
     public static function setMsgSuccess($msg){
