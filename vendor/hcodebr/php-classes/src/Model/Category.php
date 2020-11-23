@@ -80,17 +80,17 @@ class Category extends Model {
         return $results;
     }
 
-    public function getProductsPage($page = 1, $itemsPerPage = 3) {
+    public function getProductsPage($page = 1, $itemsPerPage = 10) {
         
         $start = ($page - 1) * $itemsPerPage;
         
         $sql = new Sql();
 
         $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS * FROM tb_products a 
-                        INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
-                        INNER JOIN tb_categories c ON c.idcategory = b.idcategory
-                        WHERE c.idcategory = :idcategory
-                        LIMIT $start, $itemsPerPage
+                                INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
+                                INNER JOIN tb_categories c ON c.idcategory = b.idcategory
+                                WHERE c.idcategory = :idcategory
+                                LIMIT $start, $itemsPerPage
         ", [':idcategory'=>$this->getidcategory()]);
 
         $resultsTotal = $sql->select("SELECT FOUND_ROWS() as nrtotal");
@@ -121,6 +121,49 @@ class Category extends Model {
                             ":idproduct"=>$product->getidproduct()
                         ]);
     }
+
+    public static function getPage($page = 1, $itemsPerPage = 10) {
+        
+        $start = ($page - 1) * $itemsPerPage;
+        
+        $sql = new Sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS * 
+                                 FROM tb_categories 
+                                 ORDER BY descategory
+                                 LIMIT $start, $itemsPerPage");
+
+        $resultsTotal = $sql->select("SELECT FOUND_ROWS() as nrtotal");
+        
+        return [
+            'data'=>$results,
+            'total'=>(int)$resultsTotal[0]["nrtotal"],
+            'pages'=>ceil($resultsTotal[0]["nrtotal"] / $itemsPerPage)
+        ];
+    }
+
+    public static function getPageSearch($search, $page = 1, $itemsPerPage = 10) {
+        
+        $start = ($page - 1) * $itemsPerPage;
+        
+        $sql = new Sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS * 
+                                 FROM tb_categories 
+                                 WHERE descategory LIKE :search
+                                 ORDER BY descategory
+                                 LIMIT $start, $itemsPerPage", 
+                                 [":search"=>"%$search%"]);
+
+        $resultsTotal = $sql->select("SELECT FOUND_ROWS() as nrtotal");
+        
+        return [
+            'data'=>$results,
+            'total'=>(int)$resultsTotal[0]["nrtotal"],
+            'pages'=>ceil($resultsTotal[0]["nrtotal"] / $itemsPerPage)
+        ];
+    }
+
 
 }
 

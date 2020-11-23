@@ -35,8 +35,6 @@
 		} else {
 			$pagination = User::getPageSearch($search, $page);
 		}
-		
-		
 
 		$pages = [];
 		for($x = 1; $x <= $pagination['pages']; $x++){
