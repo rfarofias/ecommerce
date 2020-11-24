@@ -7,8 +7,6 @@
     $app->get("/admin/products", function() {
         User::verifyLogin();
 
-        //$products = Product::listAll();
-        
 		$search = (isset($_GET['search'])) ? $_GET['search'] : '';
 		
 		$page = (isset($_GET['page'])) ? $_GET['page'] : 1;

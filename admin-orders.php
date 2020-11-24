@@ -97,7 +97,7 @@
 
         $page = new PageAdmin();
         $page->setTpl("orders", [
-            "orders"=>$pagination,
+            "orders"=>$pagination['data'],
 			"search"=>$search,
 			"pages"=>$pages
         ]);
