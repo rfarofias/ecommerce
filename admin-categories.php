@@ -7,7 +7,6 @@
     
     $app->get("/admin/categories", function() {
 		User::verifyLogin();
-		//$categories = Category::listAll();
 
 		$search = (isset($_GET['search'])) ? $_GET['search'] : '';
 		
@@ -22,7 +21,7 @@
 		$pages = [];
 		for($x = 1; $x <= $pagination['pages']; $x++){
 			array_push($pages, [
-				'href'=>'/admin/users?'.http_build_query([
+				'href'=>'/admin/categories?'.http_build_query([
 					'page'=>$x,
 					'search'=>$search
 				]),

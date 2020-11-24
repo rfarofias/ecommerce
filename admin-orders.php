@@ -72,10 +72,34 @@
     $app->get('/admin/orders', function() {
         User::verifyLogin();
 
-        $page = new PageAdmin();
+        $search = (isset($_GET['search'])) ? $_GET['search'] : '';
+		
+		$page = (isset($_GET['page'])) ? $_GET['page'] : 1;
+		
+		if ($search === '') {
+			$pagination = Order::getPage($page);
+		} else {
+			$pagination = Order::getPageSearch($search, $page);
+        }
+        
+        //var_dump($pagination); exit;
 
+		$pages = [];
+		for($x = 1; $x <= $pagination['pages']; $x++){
+			array_push($pages, [
+				'href'=>'/admin/orders?'.http_build_query([
+					'page'=>$x,
+					'search'=>$search
+				]),
+				'text'=>$x
+			]);
+		}
+
+        $page = new PageAdmin();
         $page->setTpl("orders", [
-            "orders"=>Order::listAll()
+            "orders"=>$pagination,
+			"search"=>$search,
+			"pages"=>$pages
         ]);
     });
 ?>
