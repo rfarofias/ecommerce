@@ -511,7 +511,6 @@
 	$app->post('/profile/change-password', function() {
 		User::verifyLogin(false);
 
-		User::clearMsgError();
 		$user = User::getFromSession();
 		if(!password_verify($_POST['current_pass'], $user->getdespassword())){
 			User::setMsgError("A senha está inválida");
@@ -548,7 +547,6 @@
 			header("Location: /profile/change-password");
 			exit;
 		}
-		//var_dump($user); exit;
 		
 		$user->setdespassword($_POST['new_pass']);
 		$user->update();

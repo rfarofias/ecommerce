@@ -61,6 +61,48 @@
 		$page->setTpl("users-create");
 	});
 
+	$app->get("/admin/users/:iduser/password", function($iduser) {
+		User::verifyLogin();
+		$user = new User();
+		$user->get((int)$iduser);
+		$page = new PageAdmin();
+		$page->setTpl("users-password", array(
+			"user"=>$user->getValues(),
+			"msgError"=>User::getMsgError(),
+			"msgSuccess"=>User::getMsgSuccess(),
+		));
+	});
+
+	$app->post("/admin/users/:iduser/password", function($iduser) {
+		User::verifyLogin();
+		
+		if(!isset($_POST['despassword']) || $_POST['despassword'] === '') {
+			User::setMsgError("Digite a nova senha");
+			header("Location: /admin/users/$iduser/password");
+			exit;
+		}
+		
+		if(!isset($_POST['despassword-confirm']) || $_POST['despassword-confirm'] === '') {
+			User::setMsgError("Confirme a nova senha");
+			header("Location: /admin/users/$iduser/password");
+			exit;
+		}
+		
+		if($_POST['despassword'] !== $_POST['despassword-confirm']){
+			User::setMsgError("A confirmação de senha não coincide com a nova senha.");
+			header("Location: /admin/users/$iduser/password");
+			exit;
+		}
+		$user = new User();
+		$user->get((int)$iduser);
+		$user->setPassword(User::getPasswordHash($_POST['despassword']));
+
+		User::setMsgSuccess("Senha alterada com sucesso!");
+
+		header("Location: /admin/users/$iduser/password");
+		exit;
+	});
+	
 	$app->get("/admin/users/:iduser/delete", function($iduser) {
 		User::verifyLogin();
 		$user = new User();
