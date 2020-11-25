@@ -113,6 +113,10 @@
 													</tr>
 												</tfoot>
 											</table>
+											<p id="billing_state_field" class="form-row form-row-first address-field validate-state" data-o_class="form-row form-row-first address-field validate-state">
+												<input type="radio" checked="checked" id=method-paypal" name="payment-method" value="1" style="float: left; margin: 30px;">
+												<label for="method-paypal"><img src="/res/site/img/logo-paypal.png" alt=""  style="float: left; margin: 64px;"></label>
+											</p>
 											<div id="payment">
 												<div class="form-row place-order">
 													<input type="submit" data-value="Place order" value="Continuar" id="place_order" name="woocommerce_checkout_place_order" class="button alt">
